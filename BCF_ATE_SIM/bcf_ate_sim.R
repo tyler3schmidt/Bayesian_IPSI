@@ -2,6 +2,8 @@ library(BART)
 library(SoftBart)
 
 
+
+# used in generate_data
 g <- function(x) {
   ifelse(x == 1, 2,
          ifelse(x == 2, -1, -4))
@@ -9,7 +11,7 @@ g <- function(x) {
 
 
 
-# Simulating data sets
+# Simulating data sets from BCF paper sim setup 
 generate_data = function(n, tau, mu){
   
   sim_matrix <- matrix(NA, nrow = n, ncol = 7)
@@ -120,7 +122,7 @@ fit_vc_bart <- function(alpha_forest, beta_forest, y, prognostic_X, treatment_X,
 }
 ##############################################################################
 # fits the propensity score and outcome regression functions
-# bart = 1 uses bart package, otherwise BCF is used 
+# BART = 1 uses bart package, otherwise BCF is used 
 nonparam_nuisance <- function(X, Z, y, BART) {
   n <- length(Z)
   if (BART ==1) {
@@ -241,8 +243,8 @@ normalize01 <- function(x) {
 
 
 ###################################################################################
-# superlearner flag, 0 is false (BART), 1 is true
-bayes_boot <- function(X, Z, y, B, nuisance_fit, delta_seq) {
+# computes the bayesain bootstrap estimate
+bayes_boot <- function(X, Z, y, B, nuisance_fit) {
   
   n <- length(Z) 
   
@@ -333,7 +335,7 @@ compute_simulation <- function(n, J, tau, mu, BART) {
               efficient_ate_est_lower = efficient_ate_est_lower,
               efficient_ate_est_upper = efficient_ate_est_upper))
 }
-n = 1000
+n = 250
 sim_id <- as.numeric(commandArgs(TRUE))
 
 
@@ -363,9 +365,5 @@ data <- list(
 
 filename <- paste0("sim", sim_id, ".rds")
 saveRDS(data, file=filename)
-
-
-
-
 
 
