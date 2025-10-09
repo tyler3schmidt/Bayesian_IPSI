@@ -295,8 +295,7 @@ bayes_boot <- function(X, Z, y, B, nuisance_fit) {
       w0_hajek * (y - mu0_hat_draw) +
       (mu1_hat_draw - mu0_hat_draw) - mean(mu1_hat_draw - mu0_hat_draw)
     
-    eif_value <- (Z / pi_hat_draw) * (y - mu1_hat_draw) - ((1 - Z) / (1 - pi_hat_draw)) * (y - mu0_hat_draw) +
-      (mu1_hat_draw - mu0_hat_draw) - mean(mu1_hat_draw - mu0_hat_draw)
+   
     
     
     efficient_ate_est[b] <- mean(mu1_hat_draw - mu0_hat_draw) + sum(random_dirch * eif_value)
