@@ -12,7 +12,7 @@ g <- function(x) {
 
 
 # Simulating data sets from BCF paper sim setup 
-generate_data = function(n, tau, mu, complex = 0){
+generate_data = function(n, tau, mu){
   
   sim_matrix <- matrix(NA, nrow = n, ncol = 7)
   x = matrix(rnorm(n * 5), nrow=n, ncol=5)
@@ -23,7 +23,6 @@ generate_data = function(n, tau, mu, complex = 0){
   x[,5] = sample(c(1,2,3), n, replace = TRUE)
   u = runif(n,0,1)
   sigma = 1
-  if(complex ==0) {
   # Tau -------- 
   if (tau == 'homogeneous'){tau_x = 3}
   if (tau == 'heterogeneous'){tau_x = 1 + 2*x[,2]*x[,4]} # x[,4] after talking to Eoghan. It makes sense!
@@ -36,20 +35,6 @@ generate_data = function(n, tau, mu, complex = 0){
   # Pi and Pihat -------- 
   pi.x = 0.8*pnorm((3*mu_x/sd(mu_x)) - 0.5*x[,1]) + 0.05 + u/10
   z = rbinom(n, 1, pi.x)
-  } else {
-    if (tau == 'homogeneous'){tau_x = 3}
-    if (tau == 'heterogeneous'){tau_x = 1 + 2*x[,2]*x[,4] + 3 *x[,3]*x[,3]*x[,3]*x[,1] + 2*x[,2] * cos(x[,3])* exp(x[,1])} 
-    # x[,4] after talking to Eoghan. It makes sense!
-    
-    # Mu -----------
-    if (mu == 'linear'){mu_x = 1 + g(x[,5]) + x[,1]*x[,3] + 3*x[,2]*x[,1] }
-    if (mu == 'nonlinear'){ mu_x = -6 + g(x[,5]) + 6*abs(x[,3] - 1)* exp(x[,2]) + 7 * x[,1]*x[,1] + 13 * x[,4]}
-    
-    
-    # Pi and Pihat -------- 
-    pi.x = 0.8*pnorm((3*mu_x/sd(mu_x)) - 0.5*x[,1]*x[,2] + exp(x[,3] + x[,4] * sin(x[,1])) + 3 * x[,4]) + 0.05 + u/10
-    z = rbinom(n, 1, pi.x)
-  }
   
   
   # Response variable
@@ -299,6 +284,17 @@ bayes_boot <- function(X, Z, y, B, nuisance_fit) {
     
     ate_est[b] <- sum(random_dirch * (mu1_hat_draw - mu0_hat_draw))
     
+    w1 <- Z / pi_hat_draw
+    w0 <- (1 - Z) / (1 - pi_hat_draw)
+    
+    w1_hajek <- w1 / sum(w1)
+    w0_hajek <- w0 / sum(w0)
+    
+    # Centered EIF structure with Hájek weights
+    eif_value <- w1_hajek * (y - mu1_hat_draw) - 
+      w0_hajek * (y - mu0_hat_draw) +
+      (mu1_hat_draw - mu0_hat_draw) - mean(mu1_hat_draw - mu0_hat_draw)
+    
     eif_value <- (Z / pi_hat_draw) * (y - mu1_hat_draw) - ((1 - Z) / (1 - pi_hat_draw)) * (y - mu0_hat_draw) +
       (mu1_hat_draw - mu0_hat_draw) - mean(mu1_hat_draw - mu0_hat_draw)
     
@@ -328,7 +324,7 @@ compute_simulation <- function(n, J, tau, mu, BART) {
   sim_seed = 70 + J
   set.seed(sim_seed)
   
-  sim <- generate_data(n=n, tau = tau, mu = mu, complex = 1)
+  sim <- generate_data(n=n, tau = tau, mu = mu)
   Z <- sim[,1]
   y <- sim[,2]
   X <- sim[,3:7]
