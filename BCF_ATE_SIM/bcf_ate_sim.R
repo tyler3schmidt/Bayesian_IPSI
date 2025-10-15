@@ -259,6 +259,9 @@ bayes_boot <- function(X, Z, y, B, nuisance_fit) {
   mu0_hat <- nuisance_fit$mu0_hat
   mu1_hat <- nuisance_fit$mu1_hat
   
+  # Suppose your pi_hat_distribution is from fit_probit() or gbart()
+  result <- check_pi_hat_convergence(pi_hat, n_chains = 5)
+  
   # burn point
   num_iter <- 4000
   burn <- floor(num_iter / 2)
@@ -284,16 +287,9 @@ bayes_boot <- function(X, Z, y, B, nuisance_fit) {
     
     ate_est[b] <- sum(random_dirch * (mu1_hat_draw - mu0_hat_draw))
     
-    w1 <- Z / pi_hat_draw
-    w0 <- (1 - Z) / (1 - pi_hat_draw)
-    
-    w1_hajek <- w1 / sum(w1)
-    w0_hajek <- w0 / sum(w0)
-    
-    # Centered EIF structure with Hájek weights
-    eif_value <- w1_hajek * (y - mu1_hat_draw) - 
-      w0_hajek * (y - mu0_hat_draw) +
+    eif_value <- (Z / pi_hat_draw) * (y - mu1_hat_draw) - ((1 - Z) / (1 - pi_hat_draw)) * (y - mu0_hat_draw) +
       (mu1_hat_draw - mu0_hat_draw) - mean(mu1_hat_draw - mu0_hat_draw)
+    
     
    
     
@@ -348,7 +344,8 @@ compute_simulation <- function(n, J, tau, mu, BART) {
 }
 n = 250
 sim_id <- as.numeric(commandArgs(TRUE))
-
+# for local test
+sim_id <- 5
 
 # BART = 1
 bart_hom_lin     <- compute_simulation(n = n, J = sim_id, tau = 'homogeneous', mu = 'linear', BART = 1)
@@ -376,5 +373,7 @@ data <- list(
 
 filename <- paste0("sim", sim_id, ".rds")
 saveRDS(data, file=filename)
+
+
 
 
