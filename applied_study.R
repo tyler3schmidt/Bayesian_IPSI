@@ -99,7 +99,7 @@ fit_softbart <- function(y, Z, X, num_iter = 4000, num_burn = 0, num_tree = 200,
     mu0_hat = mu0_post,
     mu1_hat = mu1_post,
     f = mu_train,
-    sigma = sigma,
+    sigma = sigma
   ))
 }
 
