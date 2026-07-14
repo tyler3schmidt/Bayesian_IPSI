@@ -6,3 +6,6 @@ The main code is contained in the file calibrated_stochastic_int_sim.R. This fil
 
 ## Applied Study
 The main code for the applied study is aptly named applied_study. This code heavily utilizes the nhanesA r package to obtain the data. The r package dplyr is then used to combine the seperate data sources and build the cleaned data set. The code then calls fit_probit() and fit_softbart() which are the propensity score and outcome regression functions respectively. Then the bayes_boot() function is used to obtain posterior estimates. This model fitting was completed on a MacBook Pro, taking around 30 minutes. The remaining code simply produces the plots seen in the paper. 
+
+## Note
+cursed_sim/ can safely be ignored. This was a study to determine the effect of plugging frequentist estimates into the Bayesian Boostrap machinery. The results left a lot to be desired ...
